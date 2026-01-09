@@ -88,8 +88,44 @@ class DataProcessor:
         print(f"[INFO] Shape after cleaning: {self.df.shape}")
         return self.df
     
-	
+    def generate_rfm_features(self):
+        """
+        Bonus Feature Engineering: Creates Recency, Frequency, and Monetary (RFM) table.
+        """
+        print("[INFO] Generating RFM Features...")
+        
+        # Reference date: 1 day after the last transaction
+        snapshot_date = self.df['InvoiceDate'].max() + pd.Timedelta(days=1)
+        
+        # Aggregation
+        self.rfm = self.df.groupby('CustomerID').agg({
+            'InvoiceDate': lambda x: (snapshot_date - x.max()).days, # Recency
+            'InvoiceNo': 'nunique',                                   # Frequency
+            'TotalPrice': 'sum'                                       # Monetary
+        })
+        
+        self.rfm.rename(columns={
+            'InvoiceDate': 'Recency',
+            'InvoiceNo': 'Frequency',
+            'TotalPrice': 'Monetary'
+        }, inplace=True)
+        
+        # Statistical Outlier Handling
+        # We remove extreme outliers to ensure the K-Means model is stable.
+        # Thresholds chosen based on domain knowledge and initial statistical review.
+        print("[INFO] Handling Outliers...")
+        initial_shape = self.rfm.shape
+        self.rfm = self.rfm[self.rfm['Monetary'] < 25000] 
+        self.rfm = self.rfm[self.rfm['Frequency'] < 300]
+        print(f"[INFO] Outliers removed. Rows dropped: {initial_shape[0] - self.rfm.shape[0]}")
+        
+        print(f"[INFO] RFM Table Created. Shape: {self.rfm.shape}")
+        return self.rfm
 
+
+# ==========================================
+# MAIN EXECUTION FLOW
+# ==========================================
 def main():
     print("=== FINAL PROJECT: Customer Segmentation Pipeline ===")
     
@@ -101,7 +137,8 @@ def main():
         processor = DataProcessor(url=DATA_URL, filepath=LOCAL_FILE)
         df = processor.load_data()
         df_clean = processor.clean_data()
-        
+        rfm_df = processor.generate_rfm_features()
+		
         print(df)
         print(df_clean)
         print("\n=== Project Execution Complete ===")
