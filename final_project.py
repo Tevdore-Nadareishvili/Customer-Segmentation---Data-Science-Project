@@ -146,6 +146,19 @@ class DataVisualizer:
         plt.tight_layout()
         plt.show()
 
+    
+    @staticmethod
+    def plot_boxplots(df, features):
+        """Type 2: Box Plots (Outlier Detection)."""
+        print("[INFO] Plotting Box Plots for Outlier Detection...")
+        plt.figure(figsize=(15, 5))
+        for i, col in enumerate(features, 1):
+            plt.subplot(1, 3, i)
+            sns.boxplot(y=df[col], color='lightgreen')
+            plt.title(f'Box Plot of {col}')
+        plt.tight_layout()
+        plt.show()
+
 
 # ==========================================
 # MAIN EXECUTION FLOW
