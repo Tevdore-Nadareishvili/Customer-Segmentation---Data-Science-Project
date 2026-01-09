@@ -10,6 +10,8 @@ import requests
 import io
 import sys
 import os
+import matplotlib.pyplot as plt
+
 
 # ==========================================
 # CONFIGURATION & STYLE
@@ -121,6 +123,28 @@ class DataProcessor:
         
         print(f"[INFO] RFM Table Created. Shape: {self.rfm.shape}")
         return self.rfm
+
+
+# ==========================================
+# 2. VISUALIZATION CLASS
+# ==========================================
+class DataVisualizer:
+    """
+    Handles all static and interactive visualizations.
+    Implements 6 distinct visualization types.
+    """
+
+    @staticmethod
+    def plot_distributions(df, features):
+        """Type 1: Histograms (Distribution Analysis)."""
+        print("[INFO] Plotting Feature Distributions (Histogram)...")
+        plt.figure(figsize=(15, 5))
+        for i, col in enumerate(features, 1):
+            plt.subplot(1, 3, i)
+            sns.histplot(df[col], kde=True, bins=30, color='skyblue')
+            plt.title(f'Distribution of {col}')
+        plt.tight_layout()
+        plt.show()
 
 
 # ==========================================
