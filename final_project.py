@@ -203,6 +203,25 @@ class DataVisualizer:
         )
         fig.show()
 
+
+
+# ==========================================
+# 3. MACHINE LEARNING CLASS
+# ==========================================
+class ModelTrainer:
+    """
+    Handles K-Means Clustering and Classification Models.
+    """
+    
+    def __init__(self, data):
+        self.data = data
+        self.X_scaled = None
+        self.kmeans = None
+        self.labels = None
+        self.cluster_names = {}
+        
+
+
 # ==========================================
 # MAIN EXECUTION FLOW
 # ==========================================
@@ -222,6 +241,14 @@ def main():
         print(df)
         print(df_clean)
         print("\n=== Project Execution Complete ===")
+
+        
+    # 2. EDA (Implementing 5+ Visualization Types)
+        print("\n=== Phase 2: Exploratory Data Analysis ===")
+        viz = DataVisualizer()
+        viz.plot_distributions(rfm_df, ['Recency', 'Frequency', 'Monetary'])
+        viz.plot_boxplots(rfm_df, ['Recency', 'Frequency', 'Monetary'])
+        viz.plot_correlation(rfm_df)
         
     except Exception as e:
         print(f"\n[CRITICAL ERROR] Execution failed: {e}")
@@ -229,12 +256,6 @@ def main():
         traceback.print_exc()
 
 
-    # 2. EDA (Implementing 5+ Visualization Types)
-        print("\n=== Phase 2: Exploratory Data Analysis ===")
-        viz = DataVisualizer()
-        viz.plot_distributions(rfm_df, ['Recency', 'Frequency', 'Monetary'])
-        viz.plot_boxplots(rfm_df, ['Recency', 'Frequency', 'Monetary'])
-        viz.plot_correlation(rfm_df)
 
 if __name__ == "__main__":
     main()
