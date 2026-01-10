@@ -15,6 +15,9 @@ import plotly.express as px
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, silhouette_score
 
 
 
@@ -256,6 +259,25 @@ class ModelTrainer:
         plt.grid(True)
         plt.show()
         print("[INFO] Please review the Elbow Plot to confirm K selection.")
+
+    def perform_clustering(self, n_clusters=4):
+        """
+        Required: Unsupervised Learning (K-Means).
+        """
+        print(f"[INFO] Performing K-Means Clustering with k={n_clusters}...")
+        self.kmeans = KMeans(n_clusters=n_clusters, random_state=RANDOM_STATE, n_init=10)
+        self.labels = self.kmeans.fit_predict(self.X_scaled)
+        
+        # Add labels to original data
+        self.data['Cluster'] = self.labels
+        
+        score = silhouette_score(self.X_scaled, self.labels)
+        print(f"[INFO] Silhouette Score: {score:.4f}")
+        
+        # Auto-Label Clusters based on Mean Values
+        self._auto_label_clusters()
+        
+        return self.data
         
 
 
