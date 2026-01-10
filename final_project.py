@@ -14,6 +14,8 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 import numpy as np
 from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+
 
 
 
@@ -231,6 +233,30 @@ class ModelTrainer:
         scaler = StandardScaler()
         self.X_scaled = scaler.fit_transform(data_log)
         return self.X_scaled
+    
+    def determine_optimal_k(self, max_k=10):
+        """
+        Uses the Elbow Method to find the optimal number of clusters.
+        """
+        print("[INFO] Determining optimal K using Elbow Method...")
+        inertia = []
+        K_range = range(1, max_k + 1)
+        
+        for k in K_range:
+            km = KMeans(n_clusters=k, random_state=RANDOM_STATE, n_init=10)
+            km.fit(self.X_scaled)
+            inertia.append(km.inertia_)
+            
+        # Plotting the Elbow Curve
+        plt.figure(figsize=(10, 6))
+        plt.plot(K_range, inertia, marker='o', linestyle='--')
+        plt.title('Elbow Method for Optimal K')
+        plt.xlabel('Number of Clusters (K)')
+        plt.ylabel('Inertia (Sum of Squared Distances)')
+        plt.grid(True)
+        plt.show()
+        print("[INFO] Please review the Elbow Plot to confirm K selection.")
+        
 
 
 # ==========================================
