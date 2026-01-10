@@ -228,5 +228,13 @@ def main():
         import traceback
         traceback.print_exc()
 
+
+    # 2. EDA (Implementing 5+ Visualization Types)
+        print("\n=== Phase 2: Exploratory Data Analysis ===")
+        viz = DataVisualizer()
+        viz.plot_distributions(rfm_df, ['Recency', 'Frequency', 'Monetary'])
+        viz.plot_boxplots(rfm_df, ['Recency', 'Frequency', 'Monetary'])
+        viz.plot_correlation(rfm_df)
+
 if __name__ == "__main__":
     main()
