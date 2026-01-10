@@ -170,6 +170,13 @@ class DataVisualizer:
         plt.show()
 
 
+    @staticmethod
+    def plot_pairplot(df):
+        """Type 4: Pair Plot (Multivariate Analysis)."""
+        print("[INFO] Plotting Pairplot...")
+        sns.pairplot(df, diag_kind='kde', plot_kws={'alpha': 0.5})
+        plt.show()
+
 # ==========================================
 # MAIN EXECUTION FLOW
 # ==========================================
