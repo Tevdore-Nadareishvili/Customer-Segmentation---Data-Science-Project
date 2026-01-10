@@ -160,6 +160,16 @@ class DataVisualizer:
         plt.show()
 
 
+    @staticmethod
+    def plot_correlation(df):
+        """Type 3: Heatmap (Correlation Analysis)."""
+        print("[INFO] Plotting Correlation Matrix (Heatmap)...")
+        plt.figure(figsize=(8, 6))
+        sns.heatmap(df.corr(), annot=True, cmap='coolwarm', fmt='.2f')
+        plt.title('Correlation Heatmap')
+        plt.show()
+
+
 # ==========================================
 # MAIN EXECUTION FLOW
 # ==========================================
