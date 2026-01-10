@@ -12,6 +12,9 @@ import sys
 import os
 import matplotlib.pyplot as plt
 import plotly.express as px
+import numpy as np
+from sklearn.preprocessing import StandardScaler
+
 
 
 
@@ -219,7 +222,15 @@ class ModelTrainer:
         self.kmeans = None
         self.labels = None
         self.cluster_names = {}
+    
+
+    def preprocess(self):
+        """Log transform (to handle skew) and Scale data."""
+        data_log = np.log1p(self.data)
         
+        scaler = StandardScaler()
+        self.X_scaled = scaler.fit_transform(data_log)
+        return self.X_scaled
 
 
 # ==========================================
@@ -242,7 +253,7 @@ def main():
         print(df_clean)
         print("\n=== Project Execution Complete ===")
 
-        
+
     # 2. EDA (Implementing 5+ Visualization Types)
         print("\n=== Phase 2: Exploratory Data Analysis ===")
         viz = DataVisualizer()
