@@ -177,6 +177,16 @@ class DataVisualizer:
         sns.pairplot(df, diag_kind='kde', plot_kws={'alpha': 0.5})
         plt.show()
 
+    
+    @staticmethod
+    def plot_cluster_counts(df, cluster_col):
+        """Type 5: Bar Chart (Cluster Size Analysis)."""
+        print("[INFO] Plotting Cluster Sizes (Bar Chart)...")
+        plt.figure(figsize=(8, 5))
+        sns.countplot(x=cluster_col, data=df, palette='viridis')
+        plt.title('Number of Customers per Cluster')
+        plt.show()
+
 # ==========================================
 # MAIN EXECUTION FLOW
 # ==========================================
