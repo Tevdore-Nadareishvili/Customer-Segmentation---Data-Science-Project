@@ -11,6 +11,8 @@ import io
 import sys
 import os
 import matplotlib.pyplot as plt
+import plotly.express as px
+
 
 
 # ==========================================
@@ -186,6 +188,20 @@ class DataVisualizer:
         sns.countplot(x=cluster_col, data=df, palette='viridis')
         plt.title('Number of Customers per Cluster')
         plt.show()
+
+
+    
+    @staticmethod
+    def plot_3d_clusters(df, x, y, z, cluster_col):
+        """Type 6: 3D Scatter (Interactive - Bonus)."""
+        print("[INFO] Generating Interactive 3D Cluster Plot...")
+        fig = px.scatter_3d(
+            df, x=x, y=y, z=z, color=cluster_col,
+            title="3D Customer Segments (RFM)",
+            labels={'Recency': 'Recency (Days)', 'Frequency': 'Frequency', 'Monetary': 'Total Spend'},
+            opacity=0.7
+        )
+        fig.show()
 
 # ==========================================
 # MAIN EXECUTION FLOW
