@@ -100,3 +100,46 @@ class DataVisualizer:
         plt.title('Feature Importance (Random Forest)')
         plt.ylabel('Importance Score')
         self.save_plot('07_feature_importance.png')
+        
+    def plot_monthly_sales(self, df):
+        """
+        Visualizes Spending Patterns over time (Monthly Sales).
+        """
+        print("[INFO] Plotting Monthly Sales Trends...")
+        
+        # Ensure Date is datetime
+        df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'])
+        
+        # Group by Month (Y-M)
+        # We use to_period('M') to handle Year-Month sorting correctly
+        monthly_sales = df.groupby(df['InvoiceDate'].dt.to_period('M'))['TotalPrice'].sum()
+        
+        # Convert index back to string for plotting
+        monthly_sales.index = monthly_sales.index.astype(str)
+        
+        plt.figure(figsize=(12, 6))
+        sns.lineplot(x=monthly_sales.index, y=monthly_sales.values, marker='o', color='purple')
+        plt.title('Total Revenue per Month (Spending Patterns)')
+        plt.xlabel('Month')
+        plt.ylabel('Total Sales ($)')
+        plt.xticks(rotation=45)
+        plt.grid(True)
+        plt.tight_layout()
+        self.save_plot('09_monthly_spending_patterns.png')
+
+    def plot_country_distribution(self, df):
+        """
+        Visualizes Customer Demographics.
+        """
+        print("[INFO] Plotting Customer Demographics (Country)...")
+        
+        # Get Top 10 Countries by number of unique customers
+        country_counts = df.groupby('Country')['CustomerID'].nunique().sort_values(ascending=False).head(10)
+        
+        plt.figure(figsize=(12, 6))
+        sns.barplot(x=country_counts.values, y=country_counts.index, palette='magma')
+        plt.title('Top 10 Countries by Customer Count (Demographics)')
+        plt.xlabel('Number of Unique Customers')
+        plt.ylabel('Country')
+        plt.tight_layout()
+        self.save_plot('10_country_demographics.png')

@@ -44,8 +44,8 @@ def main():
         df = processor.load_data()
         logger.log(f"[INFO] Initial Data Shape: {df.shape}")
         
-        df = processor.clean_data()
-        logger.log(f"[INFO] Shape after cleaning: {df.shape}")
+        df_clean = processor.clean_data()
+        logger.log(f"[INFO] Shape after cleaning: {df_clean.shape}")
         
         rfm_df = processor.generate_rfm_features()
         logger.log(f"[INFO] Processed Data Shape: {rfm_df.shape}")
@@ -57,6 +57,8 @@ def main():
         viz.plot_distributions(rfm_df, ['Recency', 'Frequency', 'Monetary'])
         viz.plot_boxplots(rfm_df, ['Recency', 'Frequency', 'Monetary'])
         viz.plot_correlation(rfm_df)
+        viz.plot_monthly_sales(df_clean)       
+        viz.plot_country_distribution(df_clean) 
 
         # 3. Machine Learning
         logger.log("\n--- Phase 3: Machine Learning ---")
