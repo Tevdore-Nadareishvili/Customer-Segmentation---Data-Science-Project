@@ -278,7 +278,43 @@ class ModelTrainer:
         self._auto_label_clusters()
         
         return self.data
+    
+    def _auto_label_clusters(self):
+        """
+        Heuristic to assign business-friendly names to clusters based on RFM score.
+        High R (bad), High F (good), High M (good).
+        """
+        cluster_means = self.data.groupby('Cluster').mean()
         
+        for cluster_id, row in cluster_means.iterrows():
+            # Logic: 
+            # If Recency is Low (Fresh) and Monetary is High -> Champions
+            # If Recency is High (Old) and Monetary is High -> At Risk
+            # If Recency is High and Monetary is Low -> Lost
+            
+            # Note: We compare against global means
+            r_score = row['Recency'] < self.data['Recency'].mean() # True if good
+            f_score = row['Frequency'] > self.data['Frequency'].mean() # True if good
+            m_score = row['Monetary'] > self.data['Monetary'].mean() # True if good
+            
+            if r_score and f_score and m_score:
+                label = "Champions (VIP)"
+            elif not r_score and f_score and m_score:
+                label = "At Risk Whales"
+            elif r_score and not m_score:
+                label = "Recent Users (Low Spend)"
+            elif not r_score and not f_score and not m_score:
+                label = "Lost/Dormant"
+            else:
+                label = "Regular Customers"
+                
+            self.cluster_names[cluster_id] = label
+            
+        # Map names to dataframe
+        self.data['Segment Name'] = self.data['Cluster'].map(self.cluster_names)
+        print("[INFO] Cluster Auto-Labeling Complete:")
+        print(self.cluster_names)
+
 
 
 # ==========================================
