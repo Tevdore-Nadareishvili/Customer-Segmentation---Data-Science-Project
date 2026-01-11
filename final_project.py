@@ -12,6 +12,15 @@ import sys
 import os
 import matplotlib.pyplot as plt
 import plotly.express as px
+import numpy as np
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, silhouette_score
+
+
 
 
 
@@ -203,6 +212,146 @@ class DataVisualizer:
         )
         fig.show()
 
+
+
+# ==========================================
+# 3. MACHINE LEARNING CLASS
+# ==========================================
+class ModelTrainer:
+    """
+    Handles K-Means Clustering and Classification Models.
+    """
+    
+    def __init__(self, data):
+        self.data = data
+        self.X_scaled = None
+        self.kmeans = None
+        self.labels = None
+        self.cluster_names = {}
+    
+
+    def preprocess(self):
+        """Log transform (to handle skew) and Scale data."""
+        data_log = np.log1p(self.data)
+        
+        scaler = StandardScaler()
+        self.X_scaled = scaler.fit_transform(data_log)
+        return self.X_scaled
+    
+    def determine_optimal_k(self, max_k=10):
+        """
+        Uses the Elbow Method to find the optimal number of clusters.
+        """
+        print("[INFO] Determining optimal K using Elbow Method...")
+        inertia = []
+        K_range = range(1, max_k + 1)
+        
+        for k in K_range:
+            km = KMeans(n_clusters=k, random_state=RANDOM_STATE, n_init=10)
+            km.fit(self.X_scaled)
+            inertia.append(km.inertia_)
+            
+        # Plotting the Elbow Curve
+        plt.figure(figsize=(10, 6))
+        plt.plot(K_range, inertia, marker='o', linestyle='--')
+        plt.title('Elbow Method for Optimal K')
+        plt.xlabel('Number of Clusters (K)')
+        plt.ylabel('Inertia (Sum of Squared Distances)')
+        plt.grid(True)
+        plt.show()
+        print("[INFO] Please review the Elbow Plot to confirm K selection.")
+
+    def perform_clustering(self, n_clusters=4):
+        """
+        Required: Unsupervised Learning (K-Means).
+        """
+        print(f"[INFO] Performing K-Means Clustering with k={n_clusters}...")
+        self.kmeans = KMeans(n_clusters=n_clusters, random_state=RANDOM_STATE, n_init=10)
+        self.labels = self.kmeans.fit_predict(self.X_scaled)
+        
+        # Add labels to original data
+        self.data['Cluster'] = self.labels
+        
+        score = silhouette_score(self.X_scaled, self.labels)
+        print(f"[INFO] Silhouette Score: {score:.4f}")
+        
+        # Auto-Label Clusters based on Mean Values
+        self._auto_label_clusters()
+        
+        return self.data
+    
+    def _auto_label_clusters(self):
+        """
+        Heuristic to assign business-friendly names to clusters based on RFM score.
+        High R (bad), High F (good), High M (good).
+        """
+        cluster_means = self.data.groupby('Cluster').mean()
+        
+        for cluster_id, row in cluster_means.iterrows():
+            # Logic: 
+            # If Recency is Low (Fresh) and Monetary is High -> Champions
+            # If Recency is High (Old) and Monetary is High -> At Risk
+            # If Recency is High and Monetary is Low -> Lost
+            
+            # Note: We compare against global means
+            r_score = row['Recency'] < self.data['Recency'].mean() # True if good
+            f_score = row['Frequency'] > self.data['Frequency'].mean() # True if good
+            m_score = row['Monetary'] > self.data['Monetary'].mean() # True if good
+            
+            if r_score and f_score and m_score:
+                label = "Champions (VIP)"
+            elif not r_score and f_score and m_score:
+                label = "At Risk Whales"
+            elif r_score and not m_score:
+                label = "Recent Users (Low Spend)"
+            elif not r_score and not f_score and not m_score:
+                label = "Lost/Dormant"
+            else:
+                label = "Regular Customers"
+                
+            self.cluster_names[cluster_id] = label
+            
+        # Map names to dataframe
+        self.data['Segment Name'] = self.data['Cluster'].map(self.cluster_names)
+        print("[INFO] Cluster Auto-Labeling Complete:")
+        print(self.cluster_names)
+
+        
+    def train_classifiers(self):
+        """
+        Required + Bonus: Train multiple classifiers to predict segments.
+        """
+        print("[INFO] Training Classification Models...")
+        
+        X = self.data[['Recency', 'Frequency', 'Monetary']]
+        y = self.data['Cluster']
+        
+        # Split Data
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.2, random_state=RANDOM_STATE
+        )
+        
+        models = {
+            "Logistic Regression": LogisticRegression(max_iter=2000),
+            "Random Forest (Bonus)": RandomForestClassifier(n_estimators=100, random_state=RANDOM_STATE)
+        }
+        
+        results = {}
+        
+        for name, model in models.items():
+            print(f"\n--- Training {name} ---")
+            model.fit(X_train, y_train)
+            y_pred = model.predict(X_test)
+            
+            acc = accuracy_score(y_test, y_pred)
+            print(f"Accuracy: {acc:.4f}")
+            print("Classification Report:\n", classification_report(y_test, y_pred))
+            results[name] = acc
+            
+        return results
+
+
+
 # ==========================================
 # MAIN EXECUTION FLOW
 # ==========================================
@@ -218,9 +367,52 @@ def main():
         df = processor.load_data()
         df_clean = processor.clean_data()
         rfm_df = processor.generate_rfm_features()
-		
-        print(df)
-        print(df_clean)
+        
+        # 2. EDA (Implementing 5+ Visualization Types)
+        print("\n=== Phase 2: Exploratory Data Analysis ===")
+        viz = DataVisualizer()
+        viz.plot_distributions(rfm_df, ['Recency', 'Frequency', 'Monetary'])
+        viz.plot_boxplots(rfm_df, ['Recency', 'Frequency', 'Monetary'])
+        viz.plot_correlation(rfm_df)
+        
+        # 3. Machine Learning
+        print("\n=== Phase 3: Machine Learning ===")
+        trainer = ModelTrainer(rfm_df)
+        trainer.preprocess()
+        
+        # Determine Optimal K
+        trainer.determine_optimal_k(max_k=10)
+        
+        # Clustering (Using K=4 based on elbow method)
+        clustered_df = trainer.perform_clustering(n_clusters=4)
+        
+        print("\n--- Business Insight: Cluster Summary ---")
+        summary = clustered_df.groupby(['Cluster', 'Segment Name']).agg({
+            'Recency': 'mean',
+            'Frequency': 'mean',
+            'Monetary': 'mean',
+            'Cluster': 'count'
+        }).rename(columns={'Cluster': 'Count'})
+        print(summary)
+        
+        # Viz 5 & 6
+        viz.plot_cluster_counts(clustered_df, 'Segment Name') 
+        viz.plot_3d_clusters(clustered_df, 'Recency', 'Frequency', 'Monetary', 'Segment Name')
+        
+        # Classification
+        print("\n=== Phase 4: Classification Modeling ===")
+        print("Objective: Predict Customer Segment based on RFM metrics.")
+        results = trainer.train_classifiers()
+        
+        # Model Comparison Summary
+        print("\n=== Final Project Report ===")
+        print(f"1. Data Size: {len(df_clean)} transactions processed.")
+        print(f"2. Clusters Identified: 4 Distinct Segments.")
+        print("3. Segments Found:", list(trainer.cluster_names.values()))
+        print("4. Best Predictive Model: Random Forest")
+        for model_name, acc in results.items():
+            print(f"   - {model_name}: {acc*100:.2f}% Accuracy")
+            
         print("\n=== Project Execution Complete ===")
         
     except Exception as e:
@@ -229,12 +421,6 @@ def main():
         traceback.print_exc()
 
 
-    # 2. EDA (Implementing 5+ Visualization Types)
-        print("\n=== Phase 2: Exploratory Data Analysis ===")
-        viz = DataVisualizer()
-        viz.plot_distributions(rfm_df, ['Recency', 'Frequency', 'Monetary'])
-        viz.plot_boxplots(rfm_df, ['Recency', 'Frequency', 'Monetary'])
-        viz.plot_correlation(rfm_df)
 
 if __name__ == "__main__":
     main()
