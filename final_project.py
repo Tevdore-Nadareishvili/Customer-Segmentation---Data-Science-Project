@@ -15,6 +15,7 @@ import plotly.express as px
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
+from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, silhouette_score
@@ -314,6 +315,40 @@ class ModelTrainer:
         self.data['Segment Name'] = self.data['Cluster'].map(self.cluster_names)
         print("[INFO] Cluster Auto-Labeling Complete:")
         print(self.cluster_names)
+
+        
+    def train_classifiers(self):
+        """
+        Required + Bonus: Train multiple classifiers to predict segments.
+        """
+        print("[INFO] Training Classification Models...")
+        
+        X = self.data[['Recency', 'Frequency', 'Monetary']]
+        y = self.data['Cluster']
+        
+        # Split Data
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.2, random_state=RANDOM_STATE
+        )
+        
+        models = {
+            "Logistic Regression": LogisticRegression(max_iter=2000),
+            "Random Forest (Bonus)": RandomForestClassifier(n_estimators=100, random_state=RANDOM_STATE)
+        }
+        
+        results = {}
+        
+        for name, model in models.items():
+            print(f"\n--- Training {name} ---")
+            model.fit(X_train, y_train)
+            y_pred = model.predict(X_test)
+            
+            acc = accuracy_score(y_test, y_pred)
+            print(f"Accuracy: {acc:.4f}")
+            print("Classification Report:\n", classification_report(y_test, y_pred))
+            results[name] = acc
+            
+        return results
 
 
 
