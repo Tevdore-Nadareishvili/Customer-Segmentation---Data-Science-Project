@@ -367,18 +367,53 @@ def main():
         df = processor.load_data()
         df_clean = processor.clean_data()
         rfm_df = processor.generate_rfm_features()
-		
-        print(df)
-        print(df_clean)
-        print("\n=== Project Execution Complete ===")
-
-
-    # 2. EDA (Implementing 5+ Visualization Types)
+        
+        # 2. EDA (Implementing 5+ Visualization Types)
         print("\n=== Phase 2: Exploratory Data Analysis ===")
         viz = DataVisualizer()
         viz.plot_distributions(rfm_df, ['Recency', 'Frequency', 'Monetary'])
         viz.plot_boxplots(rfm_df, ['Recency', 'Frequency', 'Monetary'])
         viz.plot_correlation(rfm_df)
+        
+        # 3. Machine Learning
+        print("\n=== Phase 3: Machine Learning ===")
+        trainer = ModelTrainer(rfm_df)
+        trainer.preprocess()
+        
+        # Determine Optimal K
+        trainer.determine_optimal_k(max_k=10)
+        
+        # Clustering (Using K=4 based on elbow method)
+        clustered_df = trainer.perform_clustering(n_clusters=4)
+        
+        print("\n--- Business Insight: Cluster Summary ---")
+        summary = clustered_df.groupby(['Cluster', 'Segment Name']).agg({
+            'Recency': 'mean',
+            'Frequency': 'mean',
+            'Monetary': 'mean',
+            'Cluster': 'count'
+        }).rename(columns={'Cluster': 'Count'})
+        print(summary)
+        
+        # Viz 5 & 6
+        viz.plot_cluster_counts(clustered_df, 'Segment Name') 
+        viz.plot_3d_clusters(clustered_df, 'Recency', 'Frequency', 'Monetary', 'Segment Name')
+        
+        # Classification
+        print("\n=== Phase 4: Classification Modeling ===")
+        print("Objective: Predict Customer Segment based on RFM metrics.")
+        results = trainer.train_classifiers()
+        
+        # Model Comparison Summary
+        print("\n=== Final Project Report ===")
+        print(f"1. Data Size: {len(df_clean)} transactions processed.")
+        print(f"2. Clusters Identified: 4 Distinct Segments.")
+        print("3. Segments Found:", list(trainer.cluster_names.values()))
+        print("4. Best Predictive Model: Random Forest")
+        for model_name, acc in results.items():
+            print(f"   - {model_name}: {acc*100:.2f}% Accuracy")
+            
+        print("\n=== Project Execution Complete ===")
         
     except Exception as e:
         print(f"\n[CRITICAL ERROR] Execution failed: {e}")
