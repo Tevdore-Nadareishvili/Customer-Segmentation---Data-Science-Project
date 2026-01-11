@@ -1,0 +1,67 @@
+=== FINAL PROJECT EXECUTION LOG ===
+
+=== FINAL PROJECT: Customer Segmentation Pipeline ===
+
+--- Phase 1: Data Processing ---
+[INFO] Initial Data Shape: (541909, 8)
+[INFO] Shape after cleaning: (397884, 9)
+[INFO] Processed Data Shape: (4300, 3)
+
+--- Phase 2: Visualization ---
+
+--- Phase 3: Machine Learning ---
+
+--- Business Insight: Cluster Summary ---
+                                Recency  Frequency     Monetary  Count
+Cluster Segment Name                                                  
+0       Champions (VIP)       14.189255  10.816850  4307.492357    819
+1       Lost/Dormant         189.356709   1.275118   318.632293   1483
+2       Recent Low Spenders   19.826245   1.984204   499.562187    823
+3       Loyal Customers       78.021277   3.714894  1508.690241   1175
+
+--- Phase 4: Classification Modeling ---
+Objective: Predict Customer Segment based on RFM metrics.
+
+=== Final Model Performance Reports ===
+
+Model: Logistic Regression
+Accuracy: 0.9593
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.95      0.96      0.96       168
+           1       0.97      0.98      0.97       308
+           2       0.95      0.94      0.95       172
+           3       0.95      0.94      0.95       212
+
+    accuracy                           0.96       860
+   macro avg       0.96      0.96      0.96       860
+weighted avg       0.96      0.96      0.96       860
+
+
+Model: Random Forest
+Accuracy: 0.9721
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.99      0.95      0.97       168
+           1       0.98      0.99      0.98       308
+           2       0.99      0.95      0.97       172
+           3       0.94      0.99      0.96       212
+
+    accuracy                           0.97       860
+   macro avg       0.97      0.97      0.97       860
+weighted avg       0.97      0.97      0.97       860
+
+
+=== Generating Classification Visualizations ===
+
+=== Final Project Report ===
+1. Data Size: 4300 customers processed.
+2. Clusters Identified: 4 Distinct Segments.
+3. Segments Found: ['Champions (VIP)', 'Lost/Dormant', 'Recent Low Spenders', 'Loyal Customers']
+4. Best Predictive Model: Random Forest
+   - Logistic Regression: 95.93% Accuracy
+   - Random Forest: 97.21% Accuracy
+
+=== Project Execution Complete ===
