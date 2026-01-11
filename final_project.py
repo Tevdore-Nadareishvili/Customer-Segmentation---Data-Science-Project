@@ -20,16 +20,13 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, silhouette_score
 
-
-
-
-
 # ==========================================
 # CONFIGURATION & STYLE
 # ==========================================
 sns.set(style="whitegrid")
 pd.set_option('display.max_columns', None)
 RANDOM_STATE = 42
+
 
 
 # ==========================================
@@ -45,7 +42,8 @@ class DataProcessor:
         self.filepath = filepath
         self.df = None
         self.rfm = None
-        
+
+
     def load_data(self):
         """Loads data from local file or downloads it if not present."""
         try:
@@ -73,6 +71,7 @@ class DataProcessor:
             print(f"[ERROR] Failed to load data: {e}")
             sys.exit(1)
 	
+
     def clean_data(self):
         """
         Performs data cleaning: removing missing IDs, cancellations, and invalid values.
@@ -101,6 +100,7 @@ class DataProcessor:
         print(f"[INFO] Shape after cleaning: {self.df.shape}")
         return self.df
     
+
     def generate_rfm_features(self):
         """
         Bonus Feature Engineering: Creates Recency, Frequency, and Monetary (RFM) table.
@@ -199,7 +199,6 @@ class DataVisualizer:
         plt.show()
 
 
-    
     @staticmethod
     def plot_3d_clusters(df, x, y, z, cluster_col):
         """Type 6: 3D Scatter (Interactive - Bonus)."""
@@ -238,6 +237,7 @@ class ModelTrainer:
         self.X_scaled = scaler.fit_transform(data_log)
         return self.X_scaled
     
+
     def determine_optimal_k(self, max_k=10):
         """
         Uses the Elbow Method to find the optimal number of clusters.
@@ -261,6 +261,7 @@ class ModelTrainer:
         plt.show()
         print("[INFO] Please review the Elbow Plot to confirm K selection.")
 
+
     def perform_clustering(self, n_clusters=4):
         """
         Required: Unsupervised Learning (K-Means).
@@ -280,6 +281,7 @@ class ModelTrainer:
         
         return self.data
     
+
     def _auto_label_clusters(self):
         """
         Heuristic to assign business-friendly names to clusters based on RFM score.
